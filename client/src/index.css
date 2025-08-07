@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(211 94% 40%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 25% 26%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 20% 96%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(210 40% 95%);
+  --accent-foreground: hsl(211 94% 40%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214 20% 88%);
+  --input: hsl(214 20% 95%);
+  --ring: hsl(211 94% 40%);
+  --chart-1: hsl(211 94% 40%);
+  --chart-2: hsl(142 76% 36%);
+  --chart-3: hsl(35 91% 56%);
+  --chart-4: hsl(142 69% 58%);
+  --chart-5: hsl(336 75% 51%);
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(210 25% 7.8431%);
+  --sidebar-primary: hsl(211 94% 40%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 40% 95%);
+  --sidebar-accent-foreground: hsl(211 94% 40%);
+  --sidebar-border: hsl(214 20% 88%);
+  --sidebar-ring: hsl(211 94% 40%);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(200 6.6667% 91.1765%);
+  --card: hsl(210 15% 8%);
+  --card-foreground: hsl(0 0% 85.0980%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(200 6.6667% 91.1765%);
+  --primary: hsl(211 94% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(195 15% 95%);
+  --secondary-foreground: hsl(210 25% 7.8431%);
+  --muted: hsl(0 0% 9.4118%);
+  --muted-foreground: hsl(210 3% 46%);
+  --accent: hsl(210 15% 15%);
+  --accent-foreground: hsl(211 94% 50%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(210 5% 15%);
+  --input: hsl(210 15% 18%);
+  --ring: hsl(211 94% 50%);
+  --sidebar: hsl(210 15% 8%);
+  --sidebar-foreground: hsl(0 0% 85.0980%);
+  --sidebar-primary: hsl(211 94% 50%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 15% 15%);
+  --sidebar-accent-foreground: hsl(211 94% 50%);
+  --sidebar-border: hsl(210 5% 15%);
+  --sidebar-ring: hsl(211 94% 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, hsl(211 94% 40%) 0%, hsl(211 94% 35%) 100%);
+}
