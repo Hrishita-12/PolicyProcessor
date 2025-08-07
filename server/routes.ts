@@ -163,8 +163,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HackRX API endpoint for submissions
   app.post("/api/v1/hackrx/run", async (req, res) => {
     try {
+      // Add CORS headers for external access
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+      
       const validatedData = queryRequestSchema.parse(req.body);
       const { documents: documentUrl, questions } = validatedData;
+
+      console.log(`Processing HackRX submission for ${questions.length} questions`);
 
       // Process document first
       const documentId = await documentProcessor.processDocument(documentUrl);
@@ -175,12 +181,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to extract document content");
       }
 
+      console.log(`Document processed successfully, content length: ${document.content.length}`);
+
       // Create embeddings
       const chunks = await documentProcessor.chunkContent(document.content);
       await vectorService.createEmbeddings(documentId, chunks);
 
+      console.log(`Created ${chunks.length} chunks with embeddings`);
+
       // Process all questions and generate batch answers
-      const answers: string[] = [];
       const relevantContexts: string[][] = [];
 
       // First, collect all relevant contexts
@@ -200,13 +209,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         documentType
       );
 
+      console.log(`Generated ${batchAnswers.length} answers successfully`);
+
       res.json({ answers: batchAnswers });
     } catch (error) {
       console.error("Error processing HackRX submission:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: "Invalid request format", details: error.errors });
       }
-      res.status(500).json({ error: "Failed to process submission" });
+      res.status(500).json({ error: "Failed to process submission", details: error.message });
     }
   });
 

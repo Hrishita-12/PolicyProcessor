@@ -16,7 +16,7 @@ interface DocumentUploadProps {
 
 export default function DocumentUpload({ onDocumentProcessed }: DocumentUploadProps) {
   const [sourceType, setSourceType] = useState("url");
-  const [documentUrl, setDocumentUrl] = useState("https://hackrx.blob.core.windows.net/assets/policy.pdf?sv=2023-01-03...");
+  const [documentUrl, setDocumentUrl] = useState("https://hackrx.blob.core.windows.net/assets/policy.pdf");
   const [documentType, setDocumentType] = useState("auto-detect");
   
   const queryClient = useQueryClient();
@@ -92,7 +92,7 @@ export default function DocumentUpload({ onDocumentProcessed }: DocumentUploadPr
             <Input
               id="document-url"
               type="url"
-              placeholder="https://hackrx.blob.core.windows.net/assets/policy.pdf..."
+              placeholder="https://hackrx.blob.core.windows.net/assets/policy.pdf"
               value={documentUrl}
               onChange={(e) => setDocumentUrl(e.target.value)}
               className="focus:ring-2 focus:ring-primary focus:border-transparent"
