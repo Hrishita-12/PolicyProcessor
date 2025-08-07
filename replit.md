@@ -4,6 +4,14 @@
 
 This is an AI-powered document processing and query system designed for handling insurance, legal, HR, and compliance documents. The system uses advanced LLM capabilities combined with vector search to provide intelligent document analysis and natural language querying. It processes documents (PDF, DOCX, email), extracts structured information, creates semantic embeddings, and provides explainable AI responses to user queries.
 
+## Recent Changes (August 7, 2025)
+
+- **Fixed Document Processing Pipeline**: Resolved infinite polling loop by implementing proper completion status
+- **Demo Mode Implementation**: Added intelligent mock responses for insurance policy queries when API keys are unavailable
+- **HackRX Competition Endpoint**: Created `/api/v1/hackrx/run` endpoint for competition submissions
+- **Improved Error Handling**: Added fallback mechanisms for API failures with realistic mock data
+- **Document Upload Flow**: Fixed processing status updates and polling termination
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

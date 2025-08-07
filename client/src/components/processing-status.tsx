@@ -12,7 +12,13 @@ export default function ProcessingStatus({ documentId }: ProcessingStatusProps) 
   const { data: statusData, isLoading } = useQuery({
     queryKey: ["/api/processing/status", documentId],
     queryFn: () => ApiClient.getProcessingStatus(documentId),
-    refetchInterval: 2000, // Refresh every 2 seconds for real-time updates
+    refetchInterval: (data) => {
+      // Stop polling if all steps are completed
+      if (data?.steps?.every(step => step.status === "completed")) {
+        return false;
+      }
+      return 2000; // Continue polling every 2 seconds
+    },
     enabled: !!documentId,
   });
 

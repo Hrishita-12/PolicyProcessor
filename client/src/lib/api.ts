@@ -58,6 +58,8 @@ export interface ProcessingStep {
 
 export interface ProcessingStatusResponse {
   steps: ProcessingStep[];
+  isComplete?: boolean;
+  documentReady?: boolean;
 }
 
 export class ApiClient {
