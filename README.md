@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-# LLM Document Query System
-=======
+
 # PolicyProcessor - LLM Document Query System
->>>>>>> d66ba7fe90257d229430e0f05c54d60e57a6ed26
 
 ## Overview
 
@@ -96,10 +93,7 @@ Preferred communication style: Simple, everyday language.
 - **Performance Metrics**: Response time tracking, token usage, and accuracy measurements
 - **Error Handling**: Comprehensive error boundary and logging system
 
-<<<<<<< HEAD
-=======
-  
->>>>>>> d66ba7fe90257d229430e0f05c54d60e57a6ed26
+
 ## Environment setup
 
 Create a `.env` file in the `PolicyProcessor` directory with the following variables:
