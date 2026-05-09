@@ -1,4 +1,4 @@
-# LLM Document Query System
+#PolicyProcessor - LLM Document Query System
 
 ## Overview
 
