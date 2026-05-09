@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM-Powered Document Query System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#1976D2',
+                    secondary: '#424242',
+                    success: '#4CAF50',
+                    warning: '#FF9800',
+                    error: '#F44336'
+                }
+            }
+        }
+    };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-brain text-2xl"></i>
+                    <h1 class="text-xl font-bold">LLM Document Query System</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 text-sm">
+                        <div class="flex items-center space-x-1">
+                            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <span>API Online</span>
+                        </div>
+                    </div>
+                    <button class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm transition-colors">
+                        <i class="fas fa-cog mr-2"></i>Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- @COMPONENT: DashboardStats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Documents Processed</p>
+                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.documentsProcessed">1,247</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fas fa-file-pdf text-blue-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Queries Processed</p>
+                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.queriesProcessed">5,832</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i class="fas fa-search text-green-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Avg Response Time</p>
+                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.avgResponseTime">2.3s</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-lg">
+                        <i class="fas fa-clock text-yellow-600"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-sm border p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Accuracy Rate</p>
+                        <p class="text-2xl font-bold text-gray-900" data-bind="stats.accuracyRate">94.2%</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <i class="fas fa-chart-line text-purple-600"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: DashboardStats -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Document Processing -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- @COMPONENT: DocumentUpload -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-upload mr-2 text-primary"></i>
+                            Document Processing
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Upload and process PDF, DOCX, and email documents</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Document Source</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="source" value="url" class="mr-2" checked>
+                                    <span class="text-sm">Blob URL</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="source" value="upload" class="mr-2">
+                                    <span class="text-sm">File Upload</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="document-url" class="block text-sm font-medium text-gray-700 mb-2">Document URL</label>
+                            <input 
+                                type="url" 
+                                id="document-url" 
+                                placeholder="https://hackrx.blob.core.windows.net/assets/policy.pdf..."
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                data-mock="true"
+                                value="https://hackrx.blob.core.windows.net/assets/policy.pdf?sv=2023-01-03..."
+                            >
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Document Type</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option>Auto-detect</option>
+                                <option>Insurance Policy</option>
+                                <option>Legal Contract</option>
+                                <option>HR Document</option>
+                                <option>Compliance Document</option>
+                            </select>
+                        </div>
+
+                        <button class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center" data-event="click:processDocument">
+                            <i class="fas fa-cogs mr-2"></i>
+                            Process Document
+                        </button>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DocumentUpload -->
+
+                <!-- @COMPONENT: QueryInterface -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-question-circle mr-2 text-primary"></i>
+                            Query Interface
+                        </h2>
+                        <p class="text-sm text-gray-600 mt-1">Ask natural language questions about your documents</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <label for="query-input" class="block text-sm font-medium text-gray-700 mb-2">Your Query</label>
+                            <textarea 
+                                id="query-input" 
+                                rows="3" 
+                                placeholder="Does this policy cover knee surgery, and what are the conditions?"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                data-mock="true"
+                            >Does this policy cover knee surgery, and what are the conditions?</textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-sm font-medium text-gray-700">Batch Queries</label>
+                                <button class="text-sm text-primary hover:text-blue-700">
+                                    <i class="fas fa-plus mr-1"></i>Add Query
+                                </button>
+                            </div>
+                            <div class="space-y-2 max-h-32 overflow-y-auto">
+                                <!-- @MAP: queries.map(query => ( -->
+                                <div class="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+                                    <span class="text-sm text-gray-700 flex-1" data-mock="true">What is the grace period for premium payment?</span>
+                                    <button class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="flex items-center space-x-2 p-2 bg-gray-50 rounded">
+                                    <span class="text-sm text-gray-700 flex-1" data-mock="true">What is the waiting period for pre-existing diseases?</span>
+                                    <button class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <!-- @END_MAP )) -->
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center" data-event="click:submitQuery">
+                                <i class="fas fa-search mr-2"></i>
+                                Submit Query
+                            </button>
+                            <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: QueryInterface -->
+
+                <!-- @COMPONENT: ProcessingStatus -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-tasks mr-2 text-primary"></i>
+                            Processing Pipeline
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <!-- @MAP: pipelineSteps.map(step => ( -->
+                            <div class="flex items-center space-x-4 p-3 border rounded-lg">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check text-green-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900" data-mock="true">Document Parsing</h4>
+                                    <p class="text-sm text-gray-600" data-mock="true">PDF content extracted successfully</p>
+                                </div>
+                                <div class="text-sm text-gray-500" data-mock="true">2.3s</div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-3 border rounded-lg">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-check text-green-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900" data-mock="true">Embedding Generation</h4>
+                                    <p class="text-sm text-gray-600" data-mock="true">Vector embeddings created</p>
+                                </div>
+                                <div class="text-sm text-gray-500" data-mock="true">1.8s</div>
+                            </div>
+                            <div class="flex items-center space-x-4 p-3 border rounded-lg bg-blue-50">
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-spinner fa-spin text-blue-600 text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-900" data-mock="true">Semantic Search</h4>
+                                    <p class="text-sm text-gray-600" data-mock="true">Searching relevant clauses...</p>
+                                </div>
+                                <div class="text-sm text-gray-500" data-mock="true">Processing...</div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ProcessingStatus -->
+            </div>
+
+            <!-- Right Column - Results & Analytics -->
+            <div class="space-y-8">
+                <!-- @COMPONENT: QueryResults -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-clipboard-list mr-2 text-primary"></i>
+                            Query Results
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4 max-h-96 overflow-y-auto">
+                            <!-- @MAP: results.map(result => ( -->
+                            <div class="border rounded-lg p-4">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h4 class="font-medium text-gray-900 text-sm" data-mock="true">Query #1</h4>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Success</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3" data-mock="true">Does this policy cover knee surgery, and what are the conditions?</p>
+                                <div class="bg-gray-50 p-3 rounded text-sm">
+                                    <p class="font-medium text-gray-700 mb-1">Answer:</p>
+                                    <p class="text-gray-600" data-mock="true">Yes, knee surgery is covered under this policy as a surgical procedure. Coverage is subject to the waiting periods and sub-limits specified in the policy terms...</p>
+                                </div>
+                                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                                    <span data-mock="true">Confidence: 94%</span>
+                                    <span data-mock="true">Response time: 1.2s</span>
+                                </div>
+                            </div>
+                            <!-- @END_MAP )) -->
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: QueryResults -->
+
+                <!-- @COMPONENT: ExplainableAI -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-lightbulb mr-2 text-primary"></i>
+                            Decision Rationale
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Relevant Clauses Found</h4>
+                                <div class="space-y-2">
+                                    <!-- @MAP: relevantClauses.map(clause => ( -->
+                                    <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-400">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-sm font-medium text-blue-900" data-mock="true">Section 4.2.1</span>
+                                            <span class="text-xs text-blue-700" data-mock="true">97% match</span>
+                                        </div>
+                                        <p class="text-sm text-blue-800" data-mock="true">Surgical procedures including orthopedic surgery are covered subject to policy terms and waiting periods...</p>
+                                    </div>
+                                    <!-- @END_MAP )) -->
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium text-gray-900 mb-2">Decision Logic</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                        <span data-mock="true">Knee surgery falls under covered surgical procedures</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                        <span data-mock="true">No explicit exclusions found</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                                        <span data-mock="true">Subject to 24-month waiting period for non-emergency cases</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: ExplainableAI -->
+
+                <!-- @COMPONENT: SystemMetrics -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-chart-bar mr-2 text-primary"></i>
+                            System Metrics
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Token Usage</span>
+                                    <span data-mock="true">2,847 / 4,000</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: 71%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Vector DB Size</span>
+                                    <span data-mock="true">1.2M embeddings</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-green-600 h-2 rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                            <div class="pt-2 border-t">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-600">API Health</span>
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        <span class="text-sm text-green-600">Operational</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: SystemMetrics -->
+            </div>
+        </div>
+
+        <!-- @COMPONENT: RecentActivity -->
+        <div class="mt-8 bg-white rounded-lg shadow-sm border">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-history mr-2 text-primary"></i>
+                    Recent Activity
+                </h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Query</th>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Response Time</th>
+                            <th class="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- @MAP: activities.map(activity => ( -->
+                        <tr data-mock="true">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">2024-01-15 14:32:15</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">policy.pdf</td>
+                            <td class="px-6 py-4 text-gray-900 max-w-xs truncate">Does this policy cover knee surgery...</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Success</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">1.2s</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button class="text-primary hover:text-blue-700 mr-2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-mock="true">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">2024-01-15 14:28:42</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">contract.docx</td>
+                            <td class="px-6 py-4 text-gray-900 max-w-xs truncate">What is the grace period for payment...</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Success</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900">0.9s</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <button class="text-primary hover:text-blue-700 mr-2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- @END_MAP )) -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: RecentActivity -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    © 2024 LLM Document Query System. Built with FastAPI, GPT-4, and FAISS.
+                </div>
+                <div class="flex items-center space-x-4 mt-4 md:mt-0">
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span>API Version:</span>
+                        <span class="font-mono bg-gray-100 px-2 py-1 rounded">v1.0.0</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-gray-600">
+                        <span>Uptime:</span>
+                        <span class="text-green-600">99.9%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        (function() {
+            // Document processing functionality
+            function processDocument() {
+                // TODO: Implement document processing API call
+                console.log('Processing document...');
+            }
+
+            // Query submission functionality  
+            function submitQuery() {
+                // TODO: Implement query submission to LLM API
+                console.log('Submitting query...');
+            }
+
+            // Real-time status updates
+            function updateProcessingStatus() {
+                // TODO: Implement WebSocket connection for real-time updates
+                console.log('Updating processing status...');
+            }
+
+            // Initialize event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // TODO: Add event listeners for form submissions and interactions
+                console.log('LLM Document Query System initialized');
+            });
+        })();
+    </script>
+</body>
+</html>

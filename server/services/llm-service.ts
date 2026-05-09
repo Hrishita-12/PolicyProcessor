@@ -1,32 +1,60 @@
 import { OpenAI } from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export class LLMService {
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
+  private gemini: GoogleGenerativeAI | null = null;
+  private provider: "openai" | "gemini" | "mock" = "mock";
 
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey || !apiKey.startsWith('sk-')) {
-      console.warn('Invalid or missing OpenAI API key. Running in demo mode with mock responses.');
-      this.openai = null as any; // Will use mock responses
+    const provider = process.env.LLM_PROVIDER?.toLowerCase();
+    if (provider === "gemini") {
+      const geminiKey = process.env.GEMINI_API_KEY;
+      if (!geminiKey || !geminiKey.startsWith("AIza")) {
+        console.warn("Invalid or missing Gemini API key. Running in demo mode with mock responses.");
+        this.provider = "mock";
+      } else {
+        this.gemini = new GoogleGenerativeAI(geminiKey);
+        this.provider = "gemini";
+      }
+    } else if (provider === "openai") {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey || !apiKey.startsWith('sk-')) {
+        console.warn('Invalid or missing OpenAI API key. Running in demo mode with mock responses.');
+        this.provider = "mock";
+      } else {
+        this.openai = new OpenAI({ apiKey });
+        this.provider = "openai";
+      }
     } else {
-      this.openai = new OpenAI({ apiKey });
+      // Default to OpenAI if LLM_PROVIDER is not set, but fallback to mock if no key
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (apiKey && apiKey.startsWith('sk-')) {
+        this.openai = new OpenAI({ apiKey });
+        this.provider = "openai";
+      } else {
+        console.warn('No valid LLM provider or API key found. Running in demo mode with mock responses.');
+        this.provider = "mock";
+      }
     }
   }
 
   async generateEmbedding(text: string): Promise<number[]> {
     try {
-      if (!this.openai) {
+      if (this.provider === "openai" && this.openai) {
+        const response = await this.openai.embeddings.create({
+          model: "text-embedding-3-small",
+          input: text,
+          encoding_format: "float",
+        });
+        return response.data[0].embedding;
+      } else if (this.provider === "gemini" && this.gemini) {
+        // Gemini does not provide direct embedding API as of now, so fallback to mock
+        return this.generateMockEmbedding(text);
+      } else {
         // Return mock embedding for demo
         return this.generateMockEmbedding(text);
       }
-      
-      const response = await this.openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: text,
-        encoding_format: "float",
-      });
-      
-      return response.data[0].embedding;
     } catch (error) {
       console.error('Error generating embedding, falling back to mock:', error);
       return this.generateMockEmbedding(text);
@@ -34,8 +62,8 @@ export class LLMService {
   }
 
   async answerQuery(
-    query: string, 
-    relevantContext: string[], 
+    query: string,
+    relevantContext: string[],
     documentType: string = "general"
   ): Promise<{
     answer: string;
@@ -44,36 +72,45 @@ export class LLMService {
     decisionLogic: string[];
   }> {
     try {
-      if (!this.openai) {
+      if (this.provider === "openai" && this.openai) {
+        const systemPrompt = this.buildSystemPrompt(documentType);
+        const userPrompt = this.buildUserPrompt(query, relevantContext);
+        const response = await this.openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          temperature: 0.1,
+          max_tokens: 1000,
+        });
+        const answer = response.choices[0].message.content || "";
+        const tokensUsed = response.usage?.total_tokens || 0;
+        const { answer: cleanAnswer, confidence, decisionLogic } = this.parseStructuredResponse(answer);
+        return {
+          answer: cleanAnswer,
+          confidence,
+          tokensUsed,
+          decisionLogic,
+        };
+      } else if (this.provider === "gemini" && this.gemini) {
+        const model = this.gemini.getGenerativeModel({ model: "gemini-pro" });
+        const contextText = relevantContext.join('\n\n---\n\n');
+        const prompt = `${this.buildSystemPrompt(documentType)}\n\nDocument Context:\n${contextText}\n\nQuestion: ${query}\n\nPlease analyze the context and answer the question following the specified format.`;
+        const result = await model.generateContent(prompt);
+        const answer = result.response.text();
+        // Gemini does not provide token usage, so set to 0
+        const { answer: cleanAnswer, confidence, decisionLogic } = this.parseStructuredResponse(answer);
+        return {
+          answer: cleanAnswer,
+          confidence,
+          tokensUsed: 0,
+          decisionLogic,
+        };
+      } else {
         // Return mock answer for demo
         return this.generateMockAnswer(query, relevantContext, documentType);
       }
-      
-      const systemPrompt = this.buildSystemPrompt(documentType);
-      const userPrompt = this.buildUserPrompt(query, relevantContext);
-
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        temperature: 0.1,
-        max_tokens: 1000,
-      });
-
-      const answer = response.choices[0].message.content || "";
-      const tokensUsed = response.usage?.total_tokens || 0;
-
-      // Extract confidence and decision logic from the structured response
-      const { answer: cleanAnswer, confidence, decisionLogic } = this.parseStructuredResponse(answer);
-
-      return {
-        answer: cleanAnswer,
-        confidence,
-        tokensUsed,
-        decisionLogic,
-      };
     } catch (error) {
       console.error('Error generating answer, falling back to mock:', error);
       return this.generateMockAnswer(query, relevantContext, documentType);
